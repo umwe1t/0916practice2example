@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>사회 어휘 퀴즈 · Vocabulary Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- token system ---- */
+    --sky-1:#7CD4F5; --sky-2:#B9EBFF; --sky-3:#EAF8FF;
+    --ink:#0F3550; --muted:#5A7A8C;
+    --card:#FFFFFF;
+    --sun:#FFC94A; --sun-dark:#F0A400;
+    --leaf:#3FBE82; --leaf-dark:#1F9A62;
+    --coral:#FF6B7A; --coral-dark:#E23F52;
+    --line:#D8ECF5;
+    --stage1:#5B9BF2; --stage1-dark:#3E7BD6;
+    --stage2:#FFA53E; --stage2-dark:#E2851A;
+    --stage3:#B27FE8; --stage3-dark:#9057CE;
+    --stage4:#F2617A; --stage4-dark:#D5405B;
+    --good:#2FB177; --good-dark:#1E8E5C;
+    --bad:#EE5A67; --bad-dark:#CF3B49;
+    --radius:22px;
+    --font-display:"Baloo 2","Noto Sans KR","Noto Sans SC",sans-serif;
+    --font-body:"Noto Sans KR","Noto Sans SC","Segoe UI",sans-serif;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"], :root:not([data-theme="light"]) {}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --sky-1:#123048; --sky-2:#0D2233; --sky-3:#0A1B28;
+      --ink:#EAF6FF; --muted:#8FB3C6; --card:#132B3D; --line:#1E4359;
+    }
+  }
+  :root[data-theme="dark"]{
+    --sky-1:#123048; --sky-2:#0D2233; --sky-3:#0A1B28;
+    --ink:#EAF6FF; --muted:#8FB3C6; --card:#132B3D; --line:#1E4359;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh; color:var(--ink); font-family:var(--font-body);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,255,255,.55) 0 90px, transparent 91px),
+      radial-gradient(circle at 85% 6%, rgba(255,255,255,.4) 0 60px, transparent 61px),
+      radial-gradient(circle at 92% 30%, rgba(255,255,255,.35) 0 40px, transparent 41px),
+      linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 45%, var(--sky-3) 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:720px;margin:0 auto;padding:16px 14px 44px;min-height:100vh;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .flags{display:flex;gap:6px;background:rgba(255,255,255,.55);border-radius:18px;padding:5px;backdrop-filter:blur(4px);}
+  .flagbtn{
+    border:none; background:transparent; border-radius:13px;
+    font-size:19px; padding:6px 9px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; min-height:38px; transition:.15s;
+  }
+  .flagbtn.active{background:var(--card); box-shadow:0 3px 0 rgba(15,53,80,.12);}
+  .scorepill{
+    background:var(--card); border-radius:999px;
+    padding:8px 16px 8px 14px; font-weight:800; font-size:13px; color:var(--stage1-dark);
+    box-shadow:0 3px 0 rgba(15,53,80,.12); font-family:var(--font-display);
+    display:flex; align-items:center; gap:6px;
+  }
+
+  .progress{display:flex; gap:6px; margin-bottom:6px;}
+  .progress .seg{flex:1; height:10px; border-radius:8px; background:rgba(255,255,255,.55); position:relative; overflow:hidden;}
+  .progress .seg.done{background:var(--good);}
+  .progress .seg.current{background:var(--stage1-dark);}
+  .stagelabels{display:flex; justify-content:space-between; font-size:11px; color:var(--ink); opacity:.65; margin:0 0 18px; font-weight:700;}
+
+  .card{
+    background:var(--card); border-radius:var(--radius);
+    box-shadow:0 12px 0 -6px rgba(15,53,80,.06), 0 18px 34px rgba(15,53,80,.14);
+    padding:24px 20px; margin-bottom:16px; border:none;
+  }
+  .hero{text-align:center; padding:38px 20px 30px; position:relative; overflow:hidden;}
+  .hero .emoji{font-size:56px; display:block; margin-bottom:6px;}
+  .hero h1{font-family:var(--font-display); font-size:27px; margin:6px 0 8px; font-weight:800; letter-spacing:.2px;}
+  .hero p{color:var(--muted); font-size:14.5px; line-height:1.7; margin:6px 0;}
+
+  .stagerow{display:flex;align-items:center;gap:12px;padding:12px 4px;}
+  .stagerow + .stagerow{border-top:1px dashed var(--line);}
+  .stagedot{width:38px;height:38px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:800; font-family:var(--font-display); font-size:16px; flex:none; box-shadow:0 3px 0 rgba(0,0,0,.15);}
+  .stagerow .stagename{font-weight:700; font-size:15px;}
+  .stagerow .stagedesc{font-size:12.5px;color:var(--muted); margin-top:1px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border:none; border-radius:18px; padding:16px 22px; font-size:16px; font-weight:800;
+    cursor:pointer; color:#fff; transition:transform .08s, box-shadow .08s; min-height:52px;
+    width:100%; font-family:var(--font-display);
+    background:linear-gradient(180deg, var(--sun) 0%, var(--sun-dark) 100%);
+    box-shadow:0 5px 0 var(--sun-dark), 0 8px 16px rgba(240,164,0,.35);
+  }
+  .btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--sun-dark), 0 4px 8px rgba(240,164,0,.3);}
+  .btn.secondary{background:var(--card); color:var(--stage1-dark); box-shadow:0 4px 0 var(--line);}
+  .btn.good{background:linear-gradient(180deg, var(--leaf) 0%, var(--leaf-dark) 100%); box-shadow:0 5px 0 var(--leaf-dark), 0 8px 16px rgba(31,154,98,.3);}
+  .btn.bad{background:linear-gradient(180deg, var(--coral) 0%, var(--coral-dark) 100%); box-shadow:0 5px 0 var(--coral-dark), 0 8px 16px rgba(226,63,82,.3);}
+  .btn:disabled{opacity:.4; cursor:not-allowed; box-shadow:none; transform:none;}
+  .btnrow{display:flex; gap:10px; margin-top:16px;}
+
+  .stagebadge{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; font-family:var(--font-display);
+    padding:6px 14px; border-radius:999px; color:#fff; margin-bottom:12px;
+  }
+  .qcounter{color:var(--muted); font-size:13px; font-weight:700; margin-bottom:6px;}
+  .qstem{font-size:17px; line-height:1.65; font-weight:700; margin:8px 0 18px;}
+  .qstem b{color:var(--stage1-dark);}
+
+  /* Stage 1 matching */
+  .match-area{position:relative; user-select:none;}
+  .match-columns{display:flex; gap:10px;}
+  .match-columns .col{flex:1; display:flex; flex-direction:column; align-items:center; gap:10px; min-width:0;}
+  .top-row{margin-bottom:38px;}
+  .bottom-row{margin-top:38px;}
+  .img-card{
+    width:100%; aspect-ratio:1/1; border-radius:18px; border:3px solid var(--line);
+    background:var(--card); display:flex; align-items:center; justify-content:center;
+    overflow:hidden; box-shadow:0 4px 0 var(--line); transition:.15s;
+  }
+  .img-card img{width:100%;height:100%;object-fit:cover;image-rendering:-webkit-optimize-contrast;}
+  .img-card.correct{border-color:var(--good); box-shadow:0 4px 0 var(--good);}
+  .img-card.incorrect{border-color:var(--bad); box-shadow:0 4px 0 var(--bad);}
+  .word-card{
+    width:100%; padding:13px 6px; border-radius:16px; border:3px solid var(--line);
+    background:var(--card); text-align:center; font-weight:800; font-size:14px;
+    box-shadow:0 4px 0 var(--line); transition:.15s;
+  }
+  .word-card.correct{border-color:var(--good); box-shadow:0 4px 0 var(--good); background:color-mix(in srgb, var(--good) 10%, var(--card));}
+  .word-card.incorrect{border-color:var(--bad); box-shadow:0 4px 0 var(--bad); background:color-mix(in srgb, var(--bad) 10%, var(--card));}
+  .dot{
+    width:20px;height:20px;border-radius:50%; background:var(--card); border:4px solid var(--muted);
+    cursor:grab; touch-action:none; box-shadow:0 2px 5px rgba(0,0,0,.18); position:relative; z-index:2;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .dot.linked{border-color:var(--stage1-dark); background:var(--stage1-dark);}
+  .dot.dragging{transform:scale(1.35);}
+  .dot.correct{border-color:var(--good); background:var(--good);}
+  .dot.incorrect{border-color:var(--bad); background:var(--bad);}
+  .connect-svg{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; z-index:1;}
+  .revealbox{margin-top:16px; padding:14px 16px; border-radius:16px; background:var(--sky-3); font-size:14px; line-height:1.7;}
+  .revealbox b{color:var(--good-dark);}
+
+  /* stage2 OX */
+  .oxrow{display:flex; gap:14px; margin-top:6px;}
+  .oxbtn{flex:1; padding:28px 0; border-radius:20px; font-size:38px; font-weight:900; font-family:var(--font-display);
+    border:4px solid var(--line); background:var(--card); cursor:pointer; color:var(--muted);
+    box-shadow:0 5px 0 var(--line); transition:.1s;}
+  .oxbtn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--line);}
+  .oxbtn.o{color:var(--good-dark);} .oxbtn.x{color:var(--bad-dark);}
+  .oxbtn.chosen-correct{border-color:var(--good); background:color-mix(in srgb, var(--good) 15%, var(--card)); box-shadow:0 5px 0 var(--good);}
+  .oxbtn.chosen-incorrect{border-color:var(--bad); background:color-mix(in srgb, var(--bad) 15%, var(--card)); box-shadow:0 5px 0 var(--bad);}
+
+  /* stage3 options */
+  .optlist{display:flex; flex-direction:column; gap:10px;}
+  .optbtn{
+    text-align:left; padding:15px 16px; border-radius:16px; border:3px solid var(--line);
+    background:var(--card); font-size:15px; font-weight:700; cursor:pointer; color:var(--ink);
+    box-shadow:0 4px 0 var(--line); transition:.1s;
+  }
+  .optbtn:active{transform:translateY(2px); box-shadow:0 2px 0 var(--line);}
+  .optbtn .optletter{display:inline-block; width:26px;height:26px;border-radius:50%;background:var(--sky-3);
+    text-align:center;line-height:26px;font-size:13px;margin-right:8px;font-weight:800;color:var(--muted); font-family:var(--font-display);}
+  .optbtn.correct{border-color:var(--good); box-shadow:0 4px 0 var(--good); background:color-mix(in srgb, var(--good) 12%, var(--card));}
+  .optbtn.incorrect{border-color:var(--bad); box-shadow:0 4px 0 var(--bad); background:color-mix(in srgb, var(--bad) 12%, var(--card));}
+  .optbtn:disabled{cursor:default;}
+
+  /* stage4 */
+  .chosung-hint{
+    display:inline-block; background:var(--sky-3); border:3px dashed var(--stage1); border-radius:16px;
+    padding:11px 18px; font-size:23px; font-weight:800; letter-spacing:5px; color:var(--stage1-dark); margin:6px 0 16px;
+    font-family:var(--font-display);
+  }
+  .textinput{
+    width:100%; padding:15px 16px; border-radius:16px; border:3px solid var(--line);
+    font-size:17px; font-weight:700; background:var(--card); color:var(--ink); margin-bottom:12px;
+  }
+  .textinput:focus{outline:none; border-color:var(--stage1);}
+  .textinput.correct{border-color:var(--good);}
+  .textinput.incorrect{border-color:var(--bad);}
+
+  .explain{
+    margin-top:16px; padding:14px 16px; border-radius:16px; font-size:14px; line-height:1.65;
+    background:var(--sky-3); border-left:5px solid var(--stage1);
+  }
+  .explain .ko{font-weight:800; margin-bottom:4px;}
+  .explain .tr{color:var(--muted);}
+  .feedback-title{font-weight:800; font-size:15.5px; margin-bottom:6px; font-family:var(--font-display);}
+  .feedback-title.correct{color:var(--good-dark);}
+  .feedback-title.incorrect{color:var(--bad-dark);}
+
+  .resultcard{text-align:center;}
+  .resultcard .bigscore{font-size:46px; font-weight:800; margin:10px 0; color:var(--stage1-dark); font-family:var(--font-display);}
+  .resultcard .pct{font-size:16px; color:var(--muted); margin-bottom:16px; font-weight:600;}
+  .passbadge{display:inline-block;padding:9px 22px;border-radius:999px;font-weight:800;font-size:14px;margin-bottom:12px; font-family:var(--font-display);}
+  .passbadge.pass{background:color-mix(in srgb, var(--good) 18%, transparent); color:var(--good-dark);}
+  .passbadge.fail{background:color-mix(in srgb, var(--bad) 18%, transparent); color:var(--bad-dark);}
+
+  .finaltable{width:100%; border-collapse:collapse; margin:18px 0; font-size:14px;}
+  .finaltable th, .finaltable td{padding:11px 8px; border-bottom:1px solid var(--line); text-align:center;}
+  .finaltable th{color:var(--muted); font-weight:700; font-size:12px;}
+  .finaltable td.stagename{text-align:left; font-weight:700;}
+
+  .footer-note{text-align:center; font-size:12px; color:var(--muted); margin-top:26px;}
+  ::selection{background:color-mix(in srgb, var(--stage1) 30%, transparent);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script id="quizdata" type="application/json">{"stage1": [{"seq": 1, "word": "정치"}, {"seq": 2, "word": "정치 제도"}, {"seq": 3, "word": "민주주의"}, {"seq": 4, "word": "주권"}, {"seq": 5, "word": "정책"}, {"seq": 6, "word": "정책 반영"}, {"seq": 7, "word": "선거"}, {"seq": 8, "word": "정당성"}, {"seq": 9, "word": "지지하다"}, {"seq": 10, "word": "정치적 의사"}, {"seq": 11, "word": "보통 선거"}, {"seq": 12, "word": "평등 선거"}, {"seq": 14, "word": "비밀 선거"}, {"seq": 16, "word": "정당"}, {"seq": 17, "word": "유권자"}, {"seq": 18, "word": "공약"}, {"seq": 19, "word": "정책 제안"}, {"seq": 20, "word": "공공의 이익"}, {"seq": 21, "word": "추구하다"}, {"seq": 22, "word": "국회"}, {"seq": 23, "word": "국회의원"}, {"seq": 24, "word": "국가기관"}, {"seq": 25, "word": "법률"}, {"seq": 26, "word": "예산안 심의"}, {"seq": 27, "word": "결산 심사"}, {"seq": 28, "word": "국정 감사"}, {"seq": 29, "word": "청문회"}, {"seq": 30, "word": "행정부"}, {"seq": 31, "word": "대통령"}, {"seq": 32, "word": "국무총리"}], "stage2": [{"seq": 33, "word": "장관", "isTrue": true, "ko": "교육, 환경, 안전 등 특정한 분야의 전문가로서 그 부서의 일을 책임지고 이끄는 리더입니다.", "en": "A leader who is an expert in a specific field—such as education, environment, or safety—and is responsible for leading that government department.", "ru": "Руководитель, который является экспертом в определённой области — образовании, экологии, безопасности и т. д. — и отвечает за работу своего ведомства.", "zh": "在教育、环境、安全等特定领域担任专家，并负责领导该部门工作的领导人。", "correctKo": "교육, 환경, 안전 등 특정한 분야의 전문가로서 그 부서의 일을 책임지고 이끄는 리더입니다.", "correctEn": "A leader who is an expert in a specific field—such as education, environment, or safety—and is responsible for leading that government department.", "correctRu": "Руководитель, который является экспертом в определённой области — образовании, экологии, безопасности и т. д. — и отвечает за работу своего ведомства.", "correctZh": "在教育、环境、安全等特定领域担任专家，并负责领导该部门工作的领导人。"}, {"seq": 34, "word": "조약 체결", "isTrue": false, "ko": "우리가 살고 있는 지역의 일을 그 지역 주민들을 위해 스스로 계획하고 살림하는 곳으로 행정부와 연결된 중요한 기관입니다.", "en": "An important institution connected to the executive branch that plans and manages the affairs of a region for the people who live there.", "ru": "Важное учреждение, связанное с исполнительной властью, которое само планирует и ведёт дела региона в интересах его жителей.", "zh": "与行政部门相连的重要机构，为本地区居民自主规划和管理本地区事务。", "correctKo": "우리나라와 다른 나라가 서로 지키기로 공식적인 약속을 하는 것입니다.", "correctEn": "An official agreement in which our country and another country promise to keep certain terms.", "correctRu": "Официальное соглашение, по которому наша страна и другая страна обещают соблюдать определённые условия.", "correctZh": "我国与他国正式约定共同遵守某些条款的协议。"}, {"seq": 35, "word": "사법부", "isTrue": true, "ko": "사람들 사이에 다툼이 생기거나 누군가 규칙을 어겼을 때, 법에 따라 옳고 그름을 따져서 해결해 주는 곳입니다.", "en": "The institution that decides right and wrong according to law when disputes arise between people or when someone breaks a rule.", "ru": "Орган, который решает, кто прав и кто виноват, по закону, когда между людьми возникает спор или кто-то нарушает правило.", "zh": "当人与人之间发生纠纷，或有人违反规则时，依照法律判断是非并加以解决的机构。", "correctKo": "사람들 사이에 다툼이 생기거나 누군가 규칙을 어겼을 때, 법에 따라 옳고 그름을 따져서 해결해 주는 곳입니다.", "correctEn": "The institution that decides right and wrong according to law when disputes arise between people or when someone breaks a rule.", "correctRu": "Орган, который решает, кто прав и кто виноват, по закону, когда между людьми возникает спор или кто-то нарушает правило.", "correctZh": "当人与人之间发生纠纷，或有人违反规则时，依照法律判断是非并加以解决的机构。"}, {"seq": 36, "word": "법원", "isTrue": false, "ko": "재판에서 심판 역할을 하는 사람입니다. 개인의 생각이나 권력자의 명령이 아니라, 오직 '헌법'과 '법률'만을 기준으로 무엇이 옳은지 최종 결정하는 사람입니다.", "en": "A person who plays the role of arbiter in a trial. Rather than personal opinion or the orders of those in power, a judge makes the final decision on what is right based only on the Constitution and the law.", "ru": "Человек, который выполняет роль арбитра в суде. Судья принимает окончательное решение о том, что правильно, руководствуясь не личным мнением или приказом власть имущих, а только Конституцией и законом.", "zh": "在审判中担任裁判角色的人。法官并非依据个人想法或权力者的命令，而是仅以'宪法'和'法律'为标准，最终判定何为正确。", "correctKo": "사법부에 속한 구체적인 기관으로, 실제로 재판이 열리고 판사님이 판결을 내리는 장소입니다.", "correctEn": "A specific institution within the judicial branch, the actual place where trials are held and judges hand down rulings.", "correctRu": "Конкретное учреждение судебной власти — место, где реально проходят судебные разбирательства и судья выносит решение.", "correctZh": "属于司法机关的具体机构，是实际举行审判、由法官作出判决的场所。"}, {"seq": 37, "word": "재판", "isTrue": true, "ko": "판사가 양쪽의 말을 공평하게 듣고, 법에 따라 누가 잘못했는지 혹은 어떤 벌을 받아야 하는지 결정하는 과정입니다.", "en": "The process in which a judge listens fairly to both sides and decides, according to law, who was wrong or what punishment should be given.", "ru": "Процесс, в котором судья беспристрастно выслушивает обе стороны и, согласно закону, решает, кто был неправ и какое наказание должно быть назначено.", "zh": "法官公平地听取双方陈述，并依照法律判定谁的过错以及应受何种处罚的过程。", "correctKo": "판사가 양쪽의 말을 공평하게 듣고, 법에 따라 누가 잘못했는지 혹은 어떤 벌을 받아야 하는지 결정하는 과정입니다.", "correctEn": "The process in which a judge listens fairly to both sides and decides, according to law, who was wrong or what punishment should be given.", "correctRu": "Процесс, в котором судья беспристрастно выслушивает обе стороны и, согласно закону, решает, кто был неправ и какое наказание должно быть назначено.", "correctZh": "法官公平地听取双方陈述，并依照法律判定谁的过错以及应受何种处罚的过程。"}, {"seq": 38, "word": "사회 질서 유지", "isTrue": false, "ko": "국민이 가진 소중한 생명, 재산, 자유 등을 국가가 함부로 뺏지 못하게 지켜주는 것입니다.", "en": "Ensuring that the state cannot arbitrarily take away citizens' precious life, property, freedom, and other rights.", "ru": "Обеспечение того, чтобы государство не могло произвольно отнять у граждан драгоценную жизнь, имущество, свободу и другие права.", "zh": "保障国家不能随意剥夺国民珍贵的生命、财产、自由等权利。", "correctKo": "사람들이 서로 싸우지 않고 안전하고 평화롭게 살 수 있도록 규칙이 잘 지켜지는 상태를 만드는 것입니다.", "correctEn": "Creating a state in which rules are well kept so that people can live safely and peacefully without fighting each other.", "correctRu": "Создание такого состояния, при котором правила хорошо соблюдаются, чтобы люди могли жить безопасно и мирно, не ссорясь друг с другом.", "correctZh": "使人们不互相争斗，能够安全、和平地生活，让规则得到良好遵守的状态。"}, {"seq": 39, "word": "지방 자치 단체", "isTrue": true, "ko": "우리가 살고 있는 지역의 일을 그 지역 주민들을 위해 스스로 계획하고 살림하는 곳으로 행정부와 연결된 중요한 기관입니다.", "en": "An important institution connected to the executive branch that plans and manages the affairs of a region for the people who live there.", "ru": "Важное учреждение, связанное с исполнительной властью, которое само планирует и ведёт дела региона в интересах его жителей.", "zh": "与行政部门相连的重要机构，为本地区居民自主规划和管理本地区事务。", "correctKo": "우리가 살고 있는 지역의 일을 그 지역 주민들을 위해 스스로 계획하고 살림하는 곳으로 행정부와 연결된 중요한 기관입니다.", "correctEn": "An important institution connected to the executive branch that plans and manages the affairs of a region for the people who live there.", "correctRu": "Важное учреждение, связанное с исполнительной властью, которое само планирует и ведёт дела региона в интересах его жителей.", "correctZh": "与行政部门相连的重要机构，为本地区居民自主规划和管理本地区事务。"}, {"seq": 40, "word": "권리 보호", "isTrue": false, "ko": "우리나라와 다른 나라가 서로 지키기로 공식적인 약속을 하는 것입니다.", "en": "An official agreement in which our country and another country promise to keep certain terms.", "ru": "Официальное соглашение, по которому наша страна и другая страна обещают соблюдать определённые условия.", "zh": "我国与他国正式约定共同遵守某些条款的协议。", "correctKo": "국민이 가진 소중한 생명, 재산, 자유 등을 국가가 함부로 뺏지 못하게 지켜주는 것입니다.", "correctEn": "Ensuring that the state cannot arbitrarily take away citizens' precious life, property, freedom, and other rights.", "correctRu": "Обеспечение того, чтобы государство не могло произвольно отнять у граждан драгоценную жизнь, имущество, свободу и другие права.", "correctZh": "保障国家不能随意剥夺国民珍贵的生命、财产、自由等权利。"}, {"seq": 41, "word": "법관", "isTrue": true, "ko": "재판에서 심판 역할을 하는 사람입니다. 개인의 생각이나 권력자의 명령이 아니라, 오직 '헌법'과 '법률'만을 기준으로 무엇이 옳은지 최종 결정하는 사람입니다.", "en": "A person who plays the role of arbiter in a trial. Rather than personal opinion or the orders of those in power, a judge makes the final decision on what is right based only on the Constitution and the law.", "ru": "Человек, который выполняет роль арбитра в суде. Судья принимает окончательное решение о том, что правильно, руководствуясь не личным мнением или приказом власть имущих, а только Конституцией и законом.", "zh": "在审判中担任裁判角色的人。法官并非依据个人想法或权力者的命令，而是仅以'宪法'和'法律'为标准，最终判定何为正确。", "correctKo": "재판에서 심판 역할을 하는 사람입니다. 개인의 생각이나 권력자의 명령이 아니라, 오직 '헌법'과 '법률'만을 기준으로 무엇이 옳은지 최종 결정하는 사람입니다.", "correctEn": "A person who plays the role of arbiter in a trial. Rather than personal opinion or the orders of those in power, a judge makes the final decision on what is right based only on the Constitution and the law.", "correctRu": "Человек, который выполняет роль арбитра в суде. Судья принимает окончательное решение о том, что правильно, руководствуясь не личным мнением или приказом власть имущих, а только Конституцией и законом.", "correctZh": "在审判中担任裁判角色的人。法官并非依据个人想法或权力者的命令，而是仅以'宪法'和'法律'为标准，最终判定何为正确。"}, {"seq": 42, "word": "삼심제도", "isTrue": false, "ko": "사법부에 속한 구체적인 기관으로, 실제로 재판이 열리고 판사님이 판결을 내리는 장소입니다.", "en": "A specific institution within the judicial branch, the actual place where trials are held and judges hand down rulings.", "ru": "Конкретное учреждение судебной власти — место, где реально проходят судебные разбирательства и судья выносит решение.", "zh": "属于司法机关的具体机构，是实际举行审判、由法官作出判决的场所。", "correctKo": "한 사건에 대해 최대 세 번까지 재판을 받을 수 있게 한 제도. 판사도 사람이라 실수할 수 있기 때문에, 억울한 사람이 생기지 않도록 기회를 더 주는 아주 소중한 약속입니다.", "correctEn": "A system that allows up to three trials for one case. Because judges are human and can make mistakes, this precious system gives people more chances so that no one is wrongly treated.", "correctRu": "Система, позволяющая рассматривать одно дело до трёх раз. Поскольку судьи тоже люди и могут ошибаться, эта драгоценная система даёт больше возможностей, чтобы никто не пострадал незаслуженно.", "correctZh": "对同一案件最多可进行三次审判的制度。因为法官也是人，可能犯错，所以为了避免有人受到冤屈而多给一次机会，是十分珍贵的约定。"}], "stage3": [{"seq": 43, "word": "국가 권력", "ko": "나라를 잘 다스리고 국민을 보호하기 위해 국가기관이 가지는 아주 강력한 힘입니다. 이 힘은 국민에게서 나온 것이기 때문에 함부로 사용하면 안 됩니다.", "en": "The very strong power that state institutions hold in order to govern the country well and protect the people. Because this power comes from the people, it must not be used carelessly.", "ru": "Очень сильная власть, которой обладают государственные органы, чтобы хорошо управлять страной и защищать народ. Поскольку эта власть исходит от народа, её нельзя использовать бездумно.", "zh": "国家机关为治理好国家、保护国民而拥有的非常强大的力量。因为这种力量来自国民，所以不能随意使用。", "options": ["국가 권력", "헌법재판소", "자유와 권리", "권력 분립", "삼권 분립"]}, {"seq": 44, "word": "헌법재판소", "ko": "법 중에서 가장 높은 법인 '헌법'을 지키는 특별한 곳으로 국회가 만든 법이나 나라의 행동이 국민의 소중한 기본권을 어기지는 않았는지 최종적으로 검사하는 기관입니다.", "en": "A special institution that protects the Constitution, the highest law of all. It gives the final ruling on whether a law made by the National Assembly, or an act of the state, has violated the people's precious basic rights.", "ru": "Особый орган, охраняющий Конституцию — высший закон страны. Он выносит окончательное решение о том, не нарушает ли закон, принятый Национальным собранием, или действие государства драгоценные основные права граждан.", "zh": "守护'宪法'这一最高法律的特别机构，最终审查国会制定的法律或国家的行为是否侵犯了国民珍贵的基本权利。", "options": ["헌법재판소", "자유와 권리", "권력 분립", "삼권 분립", "상호 견제"]}, {"seq": 45, "word": "자유와 권리", "ko": "사람이 태어날 때부터 가지고 있는 소중한 '자신의 의지대로 행동하고 생각할 수 있는 힘'과 '당당하게 요구할 수 있는 힘'을 말합니다.", "en": "The precious power, held by every person from birth, to act and think according to one's own will, and the power to confidently demand what is fair.", "ru": "Драгоценная сила, которой каждый человек обладает от рождения, — способность действовать и думать по своей воле, а также уверенно требовать справедливого отношения.", "zh": "人从出生起就拥有的珍贵力量，即'按自己意愿行动和思考的力量'与'理直气壮地提出要求的力量'。", "options": ["자유와 권리", "권력 분립", "삼권 분립", "상호 견제", "남용"]}, {"seq": 46, "word": "권력 분립", "ko": "국가의 강력한 힘을 한 곳에 몰아주지 않고 여러 기관에 나누어 맡기는 것으로 힘이 한 곳에 모이면 '남용'하기 쉽기 때문에 미리 예방하는 것입니다.", "en": "Dividing the state's strong power among several institutions instead of concentrating it in one place, in order to prevent the \"abuse\" that easily happens when power is concentrated.", "ru": "Распределение сильной власти государства между несколькими органами вместо сосредоточения её в одном месте, чтобы заранее предотвратить «злоупотребление», которое легко возникает при концентрации власти.", "zh": "不将国家强大的力量集中于一处，而是分配给多个机构，因为权力一旦集中就容易被'滥用'，所以事先加以预防。", "options": ["권력 분립", "삼권 분립", "상호 견제", "남용", "미디어"]}, {"seq": 47, "word": "삼권 분립", "ko": "국가의 힘을 국회, 행정부, 법원으로 나누어 어느 한쪽이 독점하지 못하게 하는 것입니다.", "en": "Dividing the power of the state among the National Assembly, the executive, and the courts so that no single branch can monopolize it.", "ru": "Разделение власти государства между Национальным собранием, исполнительной властью и судами, чтобы ни одна из сторон не могла монополизировать её.", "zh": "将国家的权力分为国会、行政部门和法院，使任何一方都无法独占权力。", "options": ["삼권 분립", "상호 견제", "남용", "미디어", "인쇄 매체"]}, {"seq": 48, "word": "상호 견제", "ko": "나누어진 세 기관이 서로 잘못하지 않는지 지켜보고 간섭하며 힘의 균형을 맞추는 것으로 서로의 힘이 너무 커지지 않도록 지켜보고 막는 것입니다.", "en": "The three divided institutions watching and intervening in each other to keep power balanced, so that no one branch's power grows too large.", "ru": "Три разделённых органа наблюдают друг за другом и вмешиваются, чтобы поддерживать баланс сил, не позволяя власти любого из них становиться слишком большой.", "zh": "分立的三个机构互相监督、互相干预，以维持力量的平衡，防止任何一方的力量变得过大。", "options": ["상호 견제", "남용", "미디어", "인쇄 매체", "음성 매체"]}, {"seq": 49, "word": "남용", "ko": "권력의 힘을 함부로 잘못 사용하는 것입니다.", "en": "Using the power one holds carelessly and wrongly.", "ru": "Небрежное и неправильное использование имеющейся власти.", "zh": "随意错误地使用手中权力的行为。", "options": ["남용", "미디어", "인쇄 매체", "음성 매체", "국가 권력"]}, {"seq": 50, "word": "미디어", "ko": "정보를 전달하는 도구로 책, 라디오, 영상, 인터넷 등으로 발전했습니다.", "en": "A tool for delivering information, which has developed to include books, radio, video, and the internet.", "ru": "Инструмент передачи информации, который развился и включает книги, радио, видео, интернет и т. д.", "zh": "传递信息的工具，已发展为书籍、广播、影像、互联网等多种形式。", "options": ["미디어", "인쇄 매체", "음성 매체", "국가 권력", "헌법재판소"]}, {"seq": 51, "word": "인쇄 매체", "ko": "종이에 글자나 그림을 인쇄해서 정보를 전하는 매체입니다.", "en": "Media that delivers information by printing letters or pictures on paper.", "ru": "Медиа, которые передают информацию с помощью текста или изображений, напечатанных на бумаге.", "zh": "通过在纸上印刷文字或图画来传递信息的媒体。", "options": ["인쇄 매체", "음성 매체", "국가 권력", "헌법재판소", "자유와 권리"]}, {"seq": 52, "word": "음성 매체", "ko": "눈으로 보는 것이 아니라 '귀로 듣는 소리'를 통해 정보를 전달하는 매체입니다.", "en": "Media that delivers information not through sight but through sound heard by the ear.", "ru": "Медиа, которые передают информацию не через зрение, а через звук, воспринимаемый ухом.", "zh": "不是通过眼睛看，而是通过'耳朵听到的声音'来传递信息的媒体。", "options": ["음성 매체", "국가 권력", "헌법재판소", "자유와 권리", "권력 분립"]}], "stage4": [{"seq": 53, "word": "영상 매체", "ko": "소리와 함께 '움직이는 화면'을 보여주는 매체입니다. 현장의 모습을 생생하게 전달해서 누구나 쉽고 재미있게 이해할 수 있습니다.", "en": "Media that shows a \"moving picture\" along with sound. It vividly conveys the actual scene, so anyone can understand it easily and enjoyably.", "ru": "Медиа, показывающие «движущееся изображение» вместе со звуком. Они живо передают происходящее, поэтому любой человек может легко и с интересом всё понять.", "zh": "伴随声音展示'活动画面'的媒体。它能生动地传达现场情况，让任何人都能轻松愉快地理解。"}, {"seq": 54, "word": "뉴 미디어", "ko": "인터넷과 디지털 기술이 발달하면서 새롭게 나타난 미디어입니다. 일방적으로 정보를 받기만 하는 게 아니라, 내가 직접 댓글을 달거나 영상을 올리며 '함께 소통'할 수 있는 것이 가장 큰 특징입니다.", "en": "Media that newly emerged as the internet and digital technology developed. Its biggest feature is that, instead of only receiving information one-way, I can directly comment or upload videos to \"communicate together.\"", "ru": "Медиа, появившиеся благодаря развитию интернета и цифровых технологий. Их главная особенность в том, что человек не только получает информацию, но и сам может оставлять комментарии или загружать видео, «общаясь вместе» с другими.", "zh": "随着互联网和数字技术的发展而新出现的媒体。其最大特点是不再单方面接收信息，而是可以直接发表评论或上传视频，实现'共同交流'。"}, {"seq": 55, "word": "정보 통신 기술", "ko": "정보를 만들고, 저장하고, 아주 먼 곳까지 빠르게 보내는 첨단 기술들을 모두 합쳐 부릅니다. 스마트폰, 컴퓨터, 인터넷 등이 모두 이 기술 덕분에 가능해졌습니다.", "en": "A term covering all the advanced technologies that create, store, and quickly send information over great distances. Smartphones, computers, and the internet are all possible thanks to this technology.", "ru": "Общее название передовых технологий, которые создают, сохраняют и быстро передают информацию на очень большие расстояния. Смартфоны, компьютеры, интернет — всё это стало возможным благодаря этой технологии.", "zh": "创造、存储信息，并将信息快速传送到很远地方的所有尖端技术的统称。智能手机、电脑、互联网等都得益于这项技术才得以实现。"}, {"seq": 56, "word": "동영상 공유 플랫폼", "ko": "누구나 영상을 올리고 함께 볼 수 있는 인터넷 공간입니다.", "en": "An internet space where anyone can upload and watch videos together.", "ru": "Интернет-пространство, где каждый может загружать видео и смотреть их вместе с другими.", "zh": "任何人都可以上传视频并共同观看的网络空间。"}, {"seq": 57, "word": "사회 관계망 서비스(SNS)", "ko": "온라인에서 친구를 사귀고, 내 일상이나 생각을 사진과 글로 공유하며 사람들과 관계를 맺는 서비스입니다.", "en": "A service where people make friends online and build relationships by sharing daily life and thoughts through photos and posts.", "ru": "Сервис, в котором люди заводят друзей онлайн и строят отношения, делясь повседневной жизнью и мыслями через фотографии и посты.", "zh": "在网上交朋友，通过照片和文字分享我的日常生活或想法，并与他人建立关系的服务。"}, {"seq": 58, "word": "쌍방향 의사소통", "ko": "TV처럼 정보를 받기만 하는 게 아니라, 정보를 주는 사람과 받는 사람이 서로 이야기를 주고받는 것을 말합니다.", "en": "Unlike TV, where information only flows one way, this means the sender and receiver of information exchange conversation with each other.", "ru": "В отличие от телевидения, где информация идёт только в одну сторону, здесь тот, кто передаёт информацию, и тот, кто её получает, обмениваются разговором друг с другом.", "zh": "不像电视那样只单方面接收信息，而是指信息的发出者与接收者互相交流对话。"}, {"seq": 59, "word": "여론 형성", "ko": "사회 문제에 대해 많은 사람이 각자의 의견을 말하면서, \"우리 사회가 이렇게 변해야 해!\"라는 공통된 생각(여론)이 만들어지는 과정입니다.", "en": "The process by which many people express their individual opinions about a social issue, forming a shared view—\"our society should change this way!\"—called public opinion.", "ru": "Процесс, при котором многие люди высказывают свои мнения по общественной проблеме, и складывается общая мысль — «наше общество должно измениться именно так!» — называемая общественным мнением.", "zh": "针对社会问题，许多人各自表达意见，从而形成'我们的社会应该这样改变！'这种共同想法（舆论）的过程。"}, {"seq": 60, "word": "시민 단체", "ko": "우리 사회의 여러 가지 문제를 해결하기 위해 뜻이 같은 평범한 시민들이 스스로 만든 모임입니다. 돈을 벌기 위해서가 아니라, 더 좋은 세상을 만들기 위해 활동합니다.", "en": "A group formed voluntarily by ordinary citizens who share the same goal of solving various problems in our society. It works not to make money, but to build a better world.", "ru": "Группа, добровольно созданная обычными гражданами, у которых общая цель — решать различные проблемы нашего общества. Она действует не для заработка денег, а для того, чтобы построить лучший мир.", "zh": "为解决我们社会中的各种问题，由志同道合的普通市民自发组成的团体。其活动并非为了赚钱，而是为了创造更美好的世界。"}, {"seq": 61, "word": "비판적으로 감시하다", "ko": "국가기관이나 기업이 일을 올바르게 하고 있는지, 누군가에게 피해를 주지는 않는지 눈을 크게 뜨고 꼼꼼하게 살피는 것입니다. 무조건 믿는 게 아니라 \"정말 저게 최선일까?\"라고 생각해보는 태도입니다.", "en": "Keeping a close, careful eye on whether state institutions or companies are doing things properly and not harming anyone—an attitude of not blindly trusting, but asking, \"Is this really the best way?\"", "ru": "Внимательное и тщательное наблюдение за тем, правильно ли действуют государственные органы или компании и не причиняют ли они кому-то вред, — отношение, при котором человек не верит всему бездумно, а спрашивает себя: «Действительно ли это лучший вариант?»", "zh": "仔细而认真地观察国家机关或企业是否在正确地做事，是否给他人造成损害的态度。不是盲目相信，而是思考'这真的是最好的做法吗？'的态度。"}, {"seq": 62, "word": "사회 문제에 관심", "ko": "우리 주변이나 나라에서 일어나는 일들을 '남의 일'이 아니라 '나의 일' 혹은 '우리의 일'로 생각하고 지켜보는 마음입니다.", "en": "The attitude of viewing things happening around us or in our country not as \"someone else's business\" but as \"my business\" or \"our business,\" and keeping watch on them.", "ru": "Отношение, при котором то, что происходит вокруг нас или в нашей стране, воспринимается не как «чужое дело», а как «моё дело» или «наше общее дело», за которым нужно внимательно следить.", "zh": "把我们周围或国家中发生的事情，不当作'别人的事'，而当作'我的事'或'我们的事'来关心和关注的心态。"}]}</script>
+<script>
+const IMG_MODE = "folder"; /* "embed" or "folder" */
+</script>
+
+<script>
+/* ===================== 다국어 UI 문구 ===================== */
+const LANGS = ["ko","en","ru","zh"];
+const FLAG = { ko:"🇰🇷", en:"🇺🇸", ru:"🇷🇺", zh:"🇨🇳" };
+const FLAGLABEL = { ko:"한국어", en:"English", ru:"Русский", zh:"中文" };
+
+const T = {
+  ko:{
+    title:"사회 어휘 퀴즈", subtitle:"이미지·O,X·5지선다·초성 퀴즈로 배우는 사회 핵심 어휘",
+    startBtn:"시작하기 🚀",
+    heroDesc:"1단계부터 4단계까지 순서대로 도전해요. 각 단계에서 60% 이상 맞히면 다음 단계로 올라갈 수 있어요!",
+    stageNames:["이미지-어휘 연결","O, X 퀴즈","5지선다","초성 퀴즈"],
+    stageDescs:[
+      "그림과 어휘를 알맞게 연결해 보세요.",
+      "문장이 맞으면 O, 틀리면 X를 눌러요.",
+      "설명을 읽고 알맞은 어휘를 골라요.",
+      "초성 힌트를 보고 정답을 입력해요."
+    ],
+    qOf:(a,b)=>`문제 ${a} / ${b}`,
+    matchInstruction:"그림을 먼저 누르고, 어울리는 어휘를 눌러 연결하세요.",
+    confirmBtn:"확인하기",
+    nextBtn:"다음 문제 →",
+    stageResultBtn:"결과 보기",
+    correctAnswerLabel:"정답 연결",
+    checkAnswerBtn:"정답 확인하기 👀",
+    correctAnswerTitle:"이렇게 연결하는 게 정답이에요",
+    allCorrect:"3쌍 모두 정확해요! 🎉",
+    someWrong:"정답을 확인해 보세요.",
+    oInstruction:"문장이 맞으면 O, 틀리면 X를 선택하세요.",
+    submitBtn:"제출하기",
+    inputPlaceholder:"정답을 한글로 입력하세요",
+    chosungLabel:"초성 힌트",
+    feedbackCorrect:"정답이에요! 👏",
+    feedbackIncorrect:"아쉬워요, 다시 확인해요.",
+    explainKoLabel:"한국어 설명",
+    stagePassTitle:"단계 통과! 🎉",
+    stageFailTitle:"다시 도전해요 💪",
+    stagePassDesc:"축하해요! 다음 단계로 이동할 수 있어요.",
+    stageFailDesc:"60% 미만이에요. 같은 단계를 다시 풀어봐요.",
+    scoreLabel:"점수",
+    goNextStageBtn:"다음 단계로 →",
+    retryStageBtn:"다시 도전하기 🔄",
+    finalTitle:"모든 단계를 완료했어요! 🏆",
+    finalDesc:"수고했어요! 아래는 단계별 결과 요약이에요.",
+    totalScoreLabel:"총점",
+    restartBtn:"처음부터 다시 하기",
+    stageColHeader:"단계", scoreColHeader:"점수", pctColHeader:"정답률",
+    stageShort:["1단계","2단계","3단계","4단계"],
+    passWord:"통과", failWord:"미통과",
+    currentScoreLabel:"현재 점수"
+  },
+  en:{
+    title:"Social Studies Vocabulary Quiz", subtitle:"Learn key vocabulary through matching, O/X, multiple-choice, and initial-letter quizzes",
+    startBtn:"Start 🚀",
+    heroDesc:"Go through Stage 1 to 4 in order. Score 60% or higher in each stage to move up to the next!",
+    stageNames:["Image–Word Matching","O, X Quiz","Multiple Choice","Initial-Letter Quiz"],
+    stageDescs:[
+      "Match each picture with the right word.",
+      "Press O if the sentence is true, X if it's false.",
+      "Read the description and pick the right word.",
+      "Look at the hint and type in the answer."
+    ],
+    qOf:(a,b)=>`Question ${a} / ${b}`,
+    matchInstruction:"Tap a picture first, then tap the word that matches it.",
+    confirmBtn:"Check",
+    nextBtn:"Next →",
+    stageResultBtn:"See Result",
+    correctAnswerLabel:"Correct pairs",
+    checkAnswerBtn:"See Correct Answer 👀",
+    correctAnswerTitle:"Here's how they should be connected",
+    allCorrect:"All 3 pairs correct! 🎉",
+    someWrong:"Check the correct answers below.",
+    oInstruction:"Choose O if the sentence is correct, X if it's wrong.",
+    submitBtn:"Submit",
+    inputPlaceholder:"Type the answer in Korean (Hangul)",
+    chosungLabel:"Initial-letter hint",
+    feedbackCorrect:"Correct! 👏",
+    feedbackIncorrect:"Not quite, let's check.",
+    explainKoLabel:"Korean explanation",
+    stagePassTitle:"Stage Cleared! 🎉",
+    stageFailTitle:"Let's try again 💪",
+    stagePassDesc:"Great job! You can move on to the next stage.",
+    stageFailDesc:"Below 60%. Let's try this stage again.",
+    scoreLabel:"Score",
+    goNextStageBtn:"Next Stage →",
+    retryStageBtn:"Retry Stage 🔄",
+    finalTitle:"You completed all stages! 🏆",
+    finalDesc:"Great work! Here is your stage-by-stage summary.",
+    totalScoreLabel:"Total Score",
+    restartBtn:"Start Over",
+    stageColHeader:"Stage", scoreColHeader:"Score", pctColHeader:"Accuracy",
+    stageShort:["Stage 1","Stage 2","Stage 3","Stage 4"],
+    passWord:"Passed", failWord:"Not passed",
+    currentScoreLabel:"Current score"
+  },
+  ru:{
+    title:"Викторина по словам обществознания", subtitle:"Учим ключевые слова через сопоставление, О/Х, тест с выбором ответа и подсказку по первой букве",
+    startBtn:"Начать 🚀",
+    heroDesc:"Пройдите уровни с 1 по 4 по порядку. Набрав 60% и больше на каждом уровне, вы переходите на следующий!",
+    stageNames:["Сопоставление картинки и слова","Викторина О, Х","Тест с выбором ответа","Викторина по первой букве"],
+    stageDescs:[
+      "Соедините каждую картинку с правильным словом.",
+      "Нажмите О, если утверждение верно, Х — если неверно.",
+      "Прочитайте описание и выберите правильное слово.",
+      "Посмотрите на подсказку и напишите ответ."
+    ],
+    qOf:(a,b)=>`Вопрос ${a} / ${b}`,
+    matchInstruction:"Сначала нажмите на картинку, затем на подходящее слово.",
+    confirmBtn:"Проверить",
+    nextBtn:"Далее →",
+    stageResultBtn:"Смотреть результат",
+    correctAnswerLabel:"Правильные пары",
+    checkAnswerBtn:"Посмотреть правильный ответ 👀",
+    correctAnswerTitle:"Вот как нужно было соединить",
+    allCorrect:"Все 3 пары верны! 🎉",
+    someWrong:"Проверьте правильные ответы ниже.",
+    oInstruction:"Выберите О, если предложение верно, Х — если неверно.",
+    submitBtn:"Отправить",
+    inputPlaceholder:"Введите ответ на корейском (хангыль)",
+    chosungLabel:"Подсказка (первые буквы)",
+    feedbackCorrect:"Правильно! 👏",
+    feedbackIncorrect:"Не совсем, давайте проверим.",
+    explainKoLabel:"Объяснение на корейском",
+    stagePassTitle:"Уровень пройден! 🎉",
+    stageFailTitle:"Попробуем ещё раз 💪",
+    stagePassDesc:"Отлично! Вы можете перейти на следующий уровень.",
+    stageFailDesc:"Меньше 60%. Давайте пройдём этот уровень ещё раз.",
+    scoreLabel:"Баллы",
+    goNextStageBtn:"Следующий уровень →",
+    retryStageBtn:"Повторить уровень 🔄",
+    finalTitle:"Вы завершили все уровни! 🏆",
+    finalDesc:"Отличная работа! Вот итоги по каждому уровню.",
+    totalScoreLabel:"Итоговый балл",
+    restartBtn:"Начать сначала",
+    stageColHeader:"Уровень", scoreColHeader:"Баллы", pctColHeader:"Точность",
+    stageShort:["Уровень 1","Уровень 2","Уровень 3","Уровень 4"],
+    passWord:"Пройден", failWord:"Не пройден",
+    currentScoreLabel:"Текущий балл"
+  },
+  zh:{
+    title:"社会词汇小测验", subtitle:"通过图片连线、判断题、选择题和首字母提示学习核心词汇",
+    startBtn:"开始 🚀",
+    heroDesc:"请按顺序挑战第1关到第4关。每一关得分达到60%以上才能进入下一关！",
+    stageNames:["图片-词汇连线","判断题（O,X）","五选一","首字母提示题"],
+    stageDescs:[
+      "把图片和正确的词汇连接起来。",
+      "句子正确按O，错误按X。",
+      "读完说明后选择正确的词汇。",
+      "看首字母提示，输入正确答案。"
+    ],
+    qOf:(a,b)=>`第 ${a} / ${b} 题`,
+    matchInstruction:"先点击图片，再点击与它匹配的词汇。",
+    confirmBtn:"确认",
+    nextBtn:"下一题 →",
+    stageResultBtn:"查看结果",
+    correctAnswerLabel:"正确连线",
+    checkAnswerBtn:"查看正确答案 👀",
+    correctAnswerTitle:"正确的连接方式是这样的",
+    allCorrect:"三组全部正确！🎉",
+    someWrong:"请查看下面的正确答案。",
+    oInstruction:"句子正确选O，错误选X。",
+    submitBtn:"提交",
+    inputPlaceholder:"请用韩语（한글）输入答案",
+    chosungLabel:"首字母提示",
+    feedbackCorrect:"回答正确！👏",
+    feedbackIncorrect:"不太对，我们来看看答案。",
+    explainKoLabel:"韩语说明",
+    stagePassTitle:"通关成功！🎉",
+    stageFailTitle:"再挑战一次吧 💪",
+    stagePassDesc:"太棒了！可以进入下一关了。",
+    stageFailDesc:"正确率低于60%。请再挑战一次本关。",
+    scoreLabel:"得分",
+    goNextStageBtn:"进入下一关 →",
+    retryStageBtn:"重新挑战 🔄",
+    finalTitle:"你已完成全部关卡！🏆",
+    finalDesc:"辛苦了！以下是各关卡的结果汇总。",
+    totalScoreLabel:"总分",
+    restartBtn:"重新开始",
+    stageColHeader:"关卡", scoreColHeader:"得分", pctColHeader:"正确率",
+    stageShort:["第1关","第2关","第3关","第4关"],
+    passWord:"通过", failWord:"未通过",
+    currentScoreLabel:"当前得分"
+  }
+};
+
+const STAGE_COLOR = ["var(--stage1)","var(--stage2)","var(--stage3)","var(--stage4)"];
+const STAGE_POINTS = [1,1,2,3];
+const STAGE_MAX = [10,10,20,30];
+
+/* ===================== 데이터 로드 ===================== */
+const QUIZDATA = JSON.parse(document.getElementById('quizdata').textContent);
+const IMAGES_EL = document.getElementById('imagesdata');
+const IMAGES_B64 = IMAGES_EL ? JSON.parse(IMAGES_EL.textContent) : {};
+function imgSrc(seq){
+  if(typeof IMG_MODE !== 'undefined' && IMG_MODE === 'embed'){
+    return 'data:image/jpeg;base64,' + IMAGES_B64[seq];
+  }
+  return 'images/' + seq + '.jpg';
+}
+
+/* ===================== 유틸 ===================== */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+function getChosung(str){
+  let out = "";
+  for(const ch of str){
+    const code = ch.charCodeAt(0) - 0xAC00;
+    if(code >= 0 && code <= 11171){
+      out += CHO[Math.floor(code/588)];
+    } else if(ch === " "){
+      out += " ";
+    } else if(/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(ch)){
+      out += ch;
+    }
+    // skip other chars (parentheses, latin letters) from hint
+  }
+  return out.trim();
+}
+function normalizeAnswer(s){
+  return s.replace(/\s+/g,"").replace(/[()（）·.,'"]/g,"").toLowerCase();
+}
+function cleanWord(w){
+  return w.replace(/\(.*?\)/g,"").trim();
+}
+function esc(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+/* ===================== 전역 상태 ===================== */
+const state = {
+  lang: "ko",
+  screen: "start",       // start | quiz | stageresult | final
+  stage: 1,
+  qIndex: 0,
+  stageQuestions: [],    // 현재 단계 시도의 문항 배열(섞인 상태)
+  stageScore: 0,
+  stageBestScore: [0,0,0,0],   // 통과 시 점수 기록(최종 요약용)
+  answered: false,
+  matchPairs: {},         // stage1: imgLocalIdx -> wordLocalIdx
+  selectedImg: null,
+  showCorrect: false,     // stage1: 오답 시 '정답 확인' 화면 표시 여부
+};
+
+function tt(){ return T[state.lang]; }
+
+/* ===================== 문항 세트 생성 ===================== */
+function buildStageQuestions(stageNum){
+  if(stageNum === 1){
+    const words = QUIZDATA.stage1;
+    const groups = [];
+    for(let i=0;i<words.length;i+=3){
+      groups.push(words.slice(i,i+3));
+    }
+    return groups.map(g => ({
+      type:1,
+      items: g,
+      imgOrder: shuffle([0,1,2]),
+      wordOrder: shuffle([0,1,2]),
+    }));
+  }
+  if(stageNum === 2){
+    return QUIZDATA.stage2.map(it => ({ type:2, data: it }));
+  }
+  if(stageNum === 3){
+    return QUIZDATA.stage3.map(it => ({
+      type:3, data: it,
+      shuffledOptions: shuffle(it.options),
+    }));
+  }
+  if(stageNum === 4){
+    return QUIZDATA.stage4.map(it => ({ type:4, data: it }));
+  }
+}
+
+/* ===================== 렌더링 ===================== */
+const appEl = document.getElementById('app');
+
+function render(){
+  let html = "";
+  html += renderTopbar();
+  if(state.screen === "start") html += renderStart();
+  else if(state.screen === "quiz") html += renderProgress() + renderQuestion();
+  else if(state.screen === "stageresult") html += renderProgress() + renderStageResult();
+  else if(state.screen === "final") html += renderFinal();
+  appEl.innerHTML = html;
+  attachHandlers();
+}
+
+function renderTopbar(){
+  const flags = LANGS.map(l => `
+    <button class="flagbtn ${l===state.lang?'active':''}" data-lang="${l}" title="${FLAGLABEL[l]}">
+      <span>${FLAG[l]}</span>
+    </button>`).join("");
+  const scorePill = state.screen !== "start"
+    ? `<div class="scorepill">${tt().currentScoreLabel}: ${state.stageScore}</div>` : "";
+  return `<div class="topbar"><div class="flags">${flags}</div>${scorePill}</div>`;
+}
+
+function renderStart(){
+  return `
+  <div class="card hero">
+    <span class="emoji">🏛️📚🗳️</span>
+    <h1>${esc(tt().title)}</h1>
+    <p>${esc(tt().subtitle)}</p>
+    <p>${esc(tt().heroDesc)}</p>
+  </div>
+  <div class="card">
+    ${[0,1,2,3].map(i => `
+      <div class="stagerow">
+        <div class="stagedot" style="background:${STAGE_COLOR[i]};">${i+1}</div>
+        <div>
+          <div class="stagename">${esc(tt().stageNames[i])}</div>
+          <div class="stagedesc">${esc(tt().stageDescs[i])}</div>
+        </div>
+      </div>`).join("")}
+    <button class="btn" id="startBtn" style="margin-top:18px;">${esc(tt().startBtn)}</button>
+  </div>
+  `;
+}
+
+function renderProgress(){
+  const segs = [1,2,3,4].map(s => {
+    let cls = "seg";
+    if(s < state.stage) cls += " done";
+    else if(s === state.stage) cls += " current";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+  const labels = tt().stageShort.map((t,i)=>`<span>${esc(t)}</span>`).join("");
+  return `<div class="progress">${segs}</div><div class="stagelabels">${labels}</div>`;
+}
+
+function renderQuestion(){
+  const q = state.stageQuestions[state.qIndex];
+  const total = state.stageQuestions.length;
+  let body = "";
+  if(q.type===1) body = renderStage1(q);
+  else if(q.type===2) body = renderStage2(q);
+  else if(q.type===3) body = renderStage3(q);
+  else if(q.type===4) body = renderStage4(q);
+  return `
+  <div class="card">
+    <div class="stagebadge" style="background:${STAGE_COLOR[state.stage-1]}">${esc(tt().stageNames[state.stage-1])}</div>
+    <div class="qcounter">${esc(tt().qOf(state.qIndex+1, total))}</div>
+    ${body}
+  </div>`;
+}
+
+/* ---------- Stage 1 (drag-a-line matching) ---------- */
+const PAIR_COLORS = ["#5b8def","#f2994a","#9b6bd6"];
+
+function renderStage1(q){
+  const allCorrect = q.items.every((it, idx) => Number(state.matchPairs[idx]) === idx);
+  const inCorrectView = state.answered && !allCorrect && state.showCorrect;
+  // pairs actually displayed: user's pairs normally, or the identity (correct) mapping in "show correct answer" view
+  const displayPairs = inCorrectView
+    ? Object.fromEntries(q.items.map((it, idx) => [idx, idx]))
+    : state.matchPairs;
+
+  const imgCols = q.imgOrder.map(localIdx => {
+    const item = q.items[localIdx];
+    const paired = Object.prototype.hasOwnProperty.call(displayPairs, localIdx);
+    let dotCls = "dot", cardCls = "img-card";
+    if(paired) dotCls += " linked";
+    if(state.answered && paired){
+      const correct = inCorrectView ? true : Number(displayPairs[localIdx]) === localIdx;
+      dotCls += correct ? " correct" : " incorrect";
+      cardCls += correct ? " correct" : " incorrect";
+    }
+    return `<div class="col">
+        <div class="${cardCls}" data-local="${localIdx}"><img src="${imgSrc(item.seq)}" alt="${esc(item.word)}" loading="lazy"></div>
+        <div class="${dotCls}" data-role="dot-img" data-local="${localIdx}"></div>
+      </div>`;
+  }).join("");
+
+  const wordCols = q.wordOrder.map(localIdx => {
+    const item = q.items[localIdx];
+    const matchedImgLocal = Object.keys(displayPairs).find(k => Number(displayPairs[k]) === localIdx);
+    const paired = matchedImgLocal !== undefined;
+    let dotCls = "dot", cardCls = "word-card";
+    if(paired) dotCls += " linked";
+    if(state.answered && paired){
+      const correct = inCorrectView ? true : Number(matchedImgLocal) === localIdx;
+      dotCls += correct ? " correct" : " incorrect";
+      cardCls += correct ? " correct" : " incorrect";
+    }
+    return `<div class="col">
+        <div class="${dotCls}" data-role="dot-word" data-local="${localIdx}"></div>
+        <div class="${cardCls}" data-local="${localIdx}">${esc(item.word)}</div>
+      </div>`;
+  }).join("");
+
+  let reveal = "";
+  if(state.answered){
+    if(inCorrectView){
+      reveal = `<div class="revealbox">
+        <div style="font-weight:800;margin-bottom:6px;color:var(--good-dark);">✅ ${esc(tt().correctAnswerTitle)}</div>
+      </div>`;
+    } else {
+      reveal = `<div class="revealbox">
+        <div style="font-weight:800;margin-bottom:6px;">${allCorrect? esc(tt().allCorrect) : esc(tt().someWrong)}</div>
+        ${!allCorrect ? `<div>${esc(tt().correctAnswerLabel)}: ` + q.items.map(it=>`<b>${esc(it.word)}</b>`).join(" · ") + `</div>` : ""}
+      </div>`;
+    }
+  }
+
+  const pairsCount = Object.keys(state.matchPairs).length;
+  const canConfirm = pairsCount === 3;
+
+  let footerBtn;
+  if(!state.answered){
+    footerBtn = `<button class="btn" id="confirmBtn" ${canConfirm?'':'disabled'}>${esc(tt().confirmBtn)}</button>`;
+  } else if(!allCorrect && !state.showCorrect){
+    footerBtn = `<button class="btn secondary" id="checkAnswerBtn">${esc(tt().checkAnswerBtn)}</button>`;
+  } else {
+    footerBtn = `<button class="btn" id="nextBtn">${esc(state.qIndex+1<state.stageQuestions.length ? tt().nextBtn : tt().stageResultBtn)}</button>`;
+  }
+
+  return `
+    <div class="qstem">${esc(tt().matchInstruction)}</div>
+    <div class="match-area" id="matchArea">
+      <div class="match-columns top-row">${imgCols}</div>
+      <svg class="connect-svg" id="connectSvg"></svg>
+      <div class="match-columns bottom-row">${wordCols}</div>
+    </div>
+    ${reveal}
+    <div class="btnrow">${footerBtn}</div>
+  `;
+}
+
+function dotCenter(container, role, local){
+  const el = container.querySelector(`[data-role="${role}"][data-local="${local}"]`);
+  if(!el) return null;
+  const cr = container.getBoundingClientRect();
+  const er = el.getBoundingClientRect();
+  return { x: er.left + er.width/2 - cr.left, y: er.top + er.height/2 - cr.top };
+}
+
+function drawMatchLines(tempLine){
+  const container = document.getElementById('matchArea');
+  if(!container) return;
+  const svg = document.getElementById('connectSvg');
+  if(!svg) return;
+  const q = state.stageQuestions[state.qIndex];
+  const allCorrect = q.items.every((it, idx) => Number(state.matchPairs[idx]) === idx);
+  const inCorrectView = state.answered && !allCorrect && state.showCorrect;
+  const pairsToDraw = inCorrectView
+    ? Object.fromEntries(q.items.map((it, idx) => [idx, idx]))
+    : state.matchPairs;
+  let html = "";
+  Object.keys(pairsToDraw).forEach(imgLocalStr => {
+    const imgLocal = Number(imgLocalStr);
+    const wordLocal = Number(pairsToDraw[imgLocal]);
+    const p1 = dotCenter(container, "dot-img", imgLocal);
+    const p2 = dotCenter(container, "dot-word", wordLocal);
+    if(!p1 || !p2) return;
+    let color = PAIR_COLORS[q.imgOrder.indexOf(imgLocal) % 3];
+    if(inCorrectView){
+      color = "#2FB177";
+    } else if(state.answered){
+      color = (imgLocal === wordLocal) ? "#2FB177" : "#EE5A67";
+    }
+    html += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="4" stroke-linecap="round"/>`;
+  });
+  if(tempLine){
+    html += `<line x1="${tempLine.x1}" y1="${tempLine.y1}" x2="${tempLine.x2}" y2="${tempLine.y2}" stroke="#9aa5b1" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>`;
+  }
+  svg.innerHTML = html;
+}
+
+function setupMatchDrag(){
+  const container = document.getElementById('matchArea');
+  if(!container) return;
+  drawMatchLines();
+  window.addEventListener('resize', drawMatchLines);
+
+  let dragging = null; // {type:'img'|'word', local:Number}
+
+  function pointFromEvent(e){
+    const cr = container.getBoundingClientRect();
+    return { x: e.clientX - cr.left, y: e.clientY - cr.top };
+  }
+
+  function findDropTarget(e, oppositeRole){
+    const dots = container.querySelectorAll(`[data-role="${oppositeRole}"]`);
+    const pt = { x: e.clientX, y: e.clientY };
+    let best = null, bestDist = 40;
+    dots.forEach(d => {
+      const r = d.getBoundingClientRect();
+      const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      const dist = Math.hypot(pt.x-cx, pt.y-cy);
+      if(dist < bestDist){ bestDist = dist; best = Number(d.dataset.local); }
+    });
+    return best;
+  }
+
+  function onMove(e){
+    if(!dragging) return;
+    const pt = pointFromEvent(e);
+    let start;
+    if(dragging.type === 'img') start = dotCenter(container, "dot-img", dragging.local);
+    else start = dotCenter(container, "dot-word", dragging.local);
+    if(!start) return;
+    drawMatchLines({ x1: start.x, y1: start.y, x2: pt.x, y2: pt.y });
+  }
+
+  function onUp(e){
+    if(!dragging) { cleanup(); return; }
+    const oppositeRole = dragging.type === 'img' ? 'dot-word' : 'dot-img';
+    const target = findDropTarget(e, oppositeRole);
+    if(target !== null){
+      let imgLocal, wordLocal;
+      if(dragging.type === 'img'){ imgLocal = dragging.local; wordLocal = target; }
+      else { wordLocal = dragging.local; imgLocal = target; }
+      for(const k in state.matchPairs){
+        if(Number(state.matchPairs[k]) === wordLocal) delete state.matchPairs[k];
+      }
+      delete state.matchPairs[imgLocal];
+      state.matchPairs[imgLocal] = wordLocal;
+    }
+    cleanup();
+    render();
+  }
+
+  function cleanup(){
+    dragging = null;
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    container.querySelectorAll('.dot.dragging').forEach(d => d.classList.remove('dragging'));
+    drawMatchLines();
+  }
+
+  function startDrag(role, local, e){
+    if(state.answered) return;
+    e.preventDefault();
+    dragging = { type: role === 'dot-img' ? 'img' : 'word', local };
+    const el = container.querySelector(`[data-role="${role}"][data-local="${local}"]`);
+    if(el) el.classList.add('dragging');
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  }
+
+  container.querySelectorAll('[data-role="dot-img"], [data-role="dot-word"]').forEach(dot => {
+    dot.addEventListener('pointerdown', (e) => startDrag(dot.dataset.role, Number(dot.dataset.local), e));
+  });
+}
+
+/* ---------- Stage 2 (OX) ---------- */
+function renderStage2(q){
+  const d = q.data;
+  const sentence = state.lang === "ko"
+    ? `'${d.word}'는 ${d.ko} 이다.`
+    : `'${d.word}'는 ${d[state.lang]} 이다.`;
+  let feedback = "";
+  let oClass = "oxbtn o", xClass = "oxbtn x";
+  if(state.answered){
+    const userTrue = state.userAnswer;
+    if(d.isTrue){
+      oClass += userTrue===true ? " chosen-correct" : "";
+      xClass += userTrue===false ? " chosen-incorrect" : "";
+    } else {
+      xClass += userTrue===false ? " chosen-correct" : "";
+      oClass += userTrue===true ? " chosen-incorrect" : "";
+    }
+    const isCorrect = userTrue === d.isTrue;
+    feedback = `
+      <div class="feedback-title ${isCorrect?'correct':'incorrect'}">${isCorrect? esc(tt().feedbackCorrect) : esc(tt().feedbackIncorrect)}</div>
+      ${!isCorrect || true ? `
+      <div class="explain">
+        <div class="ko">${esc(d.word)} — ${esc(d.correctKo)}</div>
+        ${state.lang!=='ko' ? `<div class="tr">${esc(d.word)} — ${esc(d["correct"+state.lang.charAt(0).toUpperCase()+state.lang.slice(1)])}</div>` : ""}
+      </div>` : ""}
+    `;
+  }
+  return `
+    <div class="qstem">${esc(sentence)}</div>
+    <div class="oxrow">
+      <button class="${oClass}" data-role="ox" data-val="true" ${state.answered?'disabled':''}>O</button>
+      <button class="${xClass}" data-role="ox" data-val="false" ${state.answered?'disabled':''}>X</button>
+    </div>
+    ${feedback}
+    ${state.answered ? `<div class="btnrow"><button class="btn" id="nextBtn">${esc(state.qIndex+1<state.stageQuestions.length ? tt().nextBtn : tt().stageResultBtn)}</button></div>` : ""}
+  `;
+}
+
+/* ---------- Stage 3 (5 choice) ---------- */
+function renderStage3(q){
+  const d = q.data;
+  const stem = state.lang === "ko" ? d.ko : d[state.lang];
+  const letters = ["①","②","③","④","⑤"];
+  const opts = q.shuffledOptions.map((opt,i) => {
+    let cls = "optbtn";
+    if(state.answered){
+      if(opt === d.word) cls += " correct";
+      else if(opt === state.userAnswer) cls += " incorrect";
+    }
+    return `<button class="${cls}" data-role="opt" data-val="${esc(opt)}" ${state.answered?'disabled':''}>
+      <span class="optletter">${letters[i]}</span>${esc(opt)}
+    </button>`;
+  }).join("");
+  let feedback = "";
+  if(state.answered){
+    const isCorrect = state.userAnswer === d.word;
+    feedback = `
+      <div class="feedback-title ${isCorrect?'correct':'incorrect'}">${isCorrect? esc(tt().feedbackCorrect) : esc(tt().feedbackIncorrect)}</div>
+      <div class="explain">
+        <div class="ko">${esc(d.word)} — ${esc(d.ko)}</div>
+        ${state.lang!=='ko' ? `<div class="tr">${esc(d.word)} — ${esc(d[state.lang])}</div>` : ""}
+      </div>
+    `;
+  }
+  return `
+    <div class="qstem"><b>${esc(stem)}</b></div>
+    <div class="optlist">${opts}</div>
+    ${feedback}
+    ${state.answered ? `<div class="btnrow"><button class="btn" id="nextBtn">${esc(state.qIndex+1<state.stageQuestions.length ? tt().nextBtn : tt().stageResultBtn)}</button></div>` : ""}
+  `;
+}
+
+/* ---------- Stage 4 (chosung) ---------- */
+function renderStage4(q){
+  const d = q.data;
+  const stem = state.lang === "ko" ? d.ko : d[state.lang];
+  const hint = getChosung(cleanWord(d.word));
+  let feedback = "";
+  let inputCls = "textinput";
+  if(state.answered){
+    const isCorrect = normalizeAnswer(state.userAnswer||"") === normalizeAnswer(cleanWord(d.word));
+    inputCls += isCorrect ? " correct" : " incorrect";
+    feedback = `
+      <div class="feedback-title ${isCorrect?'correct':'incorrect'}">${isCorrect? esc(tt().feedbackCorrect) : esc(tt().feedbackIncorrect)}</div>
+      <div class="explain">
+        <div class="ko">${esc(d.word)} — ${esc(d.ko)}</div>
+        ${state.lang!=='ko' ? `<div class="tr">${esc(d.word)} — ${esc(d[state.lang])}</div>` : ""}
+      </div>
+    `;
+  }
+  return `
+    <div class="qstem"><b>${esc(stem)}</b></div>
+    <div>${esc(tt().chosungLabel)}</div>
+    <div class="chosung-hint">${esc(hint)}</div>
+    <input type="text" class="${inputCls}" id="answerInput" placeholder="${esc(tt().inputPlaceholder)}"
+      value="${state.answered? esc(state.userAnswer||"") : ""}" ${state.answered?'disabled':''} autocomplete="off">
+    ${feedback}
+    <div class="btnrow">
+      ${!state.answered
+        ? `<button class="btn" id="submitBtn">${esc(tt().submitBtn)}</button>`
+        : `<button class="btn" id="nextBtn">${esc(state.qIndex+1<state.stageQuestions.length ? tt().nextBtn : tt().stageResultBtn)}</button>`}
+    </div>
+  `;
+}
+
+/* ---------- Stage Result ---------- */
+function renderStageResult(){
+  const max = STAGE_MAX[state.stage-1];
+  const pct = Math.round((state.stageScore/max)*100);
+  const pass = pct >= 60;
+  return `
+  <div class="card resultcard">
+    <div class="passbadge ${pass?'pass':'fail'}">${pass? esc(tt().passWord) : esc(tt().failWord)}</div>
+    <h2>${pass? esc(tt().stagePassTitle) : esc(tt().stageFailTitle)}</h2>
+    <div class="bigscore">${state.stageScore} / ${max}</div>
+    <div class="pct">${pct}%</div>
+    <p style="color:var(--muted);">${pass? esc(tt().stagePassDesc) : esc(tt().stageFailDesc)}</p>
+    <button class="btn ${pass?'good':'bad'}" id="stageContinueBtn">
+      ${pass ? (state.stage<4 ? esc(tt().goNextStageBtn) : esc(tt().finalTitle)) : esc(tt().retryStageBtn)}
+    </button>
+  </div>`;
+}
+
+/* ---------- Final ---------- */
+function renderFinal(){
+  const rows = [0,1,2,3].map(i => {
+    const pct = Math.round((state.stageBestScore[i]/STAGE_MAX[i])*100);
+    return `<tr>
+      <td class="stagename">${esc(tt().stageShort[i])} · ${esc(tt().stageNames[i])}</td>
+      <td>${state.stageBestScore[i]} / ${STAGE_MAX[i]}</td>
+      <td>${pct}%</td>
+    </tr>`;
+  }).join("");
+  const total = state.stageBestScore.reduce((a,b)=>a+b,0);
+  const totalMax = STAGE_MAX.reduce((a,b)=>a+b,0);
+  return `
+  <div class="card resultcard">
+    <div class="emoji" style="font-size:52px;">🏆</div>
+    <h1>${esc(tt().finalTitle)}</h1>
+    <p style="color:var(--muted);">${esc(tt().finalDesc)}</p>
+    <table class="finaltable">
+      <thead><tr><th>${esc(tt().stageColHeader)}</th><th>${esc(tt().scoreColHeader)}</th><th>${esc(tt().pctColHeader)}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="bigscore">${total} / ${totalMax}</div>
+    <div class="pct">${esc(tt().totalScoreLabel)}</div>
+    <button class="btn" id="restartBtn" style="margin-top:10px;">${esc(tt().restartBtn)}</button>
+  </div>`;
+}
+
+/* ===================== 이벤트 처리 ===================== */
+function attachHandlers(){
+  appEl.querySelectorAll('.flagbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.lang = btn.dataset.lang;
+      render();
+    });
+  });
+
+  const startBtn = document.getElementById('startBtn');
+  if(startBtn) startBtn.addEventListener('click', () => startStage(1));
+
+  const restartBtn = document.getElementById('restartBtn');
+  if(restartBtn) restartBtn.addEventListener('click', () => {
+    state.stage = 1; state.stageBestScore = [0,0,0,0]; state.screen = "start"; render();
+  });
+
+  const stageContinueBtn = document.getElementById('stageContinueBtn');
+  if(stageContinueBtn) stageContinueBtn.addEventListener('click', () => {
+    const max = STAGE_MAX[state.stage-1];
+    const pass = Math.round((state.stageScore/max)*100) >= 60;
+    if(pass){
+      state.stageBestScore[state.stage-1] = state.stageScore;
+      if(state.stage < 4){ startStage(state.stage+1); }
+      else { state.screen = "final"; render(); }
+    } else {
+      startStage(state.stage);
+    }
+  });
+
+  if(state.screen !== "quiz") return;
+  const q = state.stageQuestions[state.qIndex];
+
+  if(q.type === 1){
+    setupMatchDrag();
+    const confirmBtn = document.getElementById('confirmBtn');
+    if(confirmBtn) confirmBtn.addEventListener('click', () => {
+      const q = state.stageQuestions[state.qIndex];
+      const allCorrect = q.items.every((it, idx) => Number(state.matchPairs[idx]) === idx);
+      if(allCorrect) state.stageScore += STAGE_POINTS[0];
+      state.answered = true;
+      render();
+    });
+    const checkAnswerBtn = document.getElementById('checkAnswerBtn');
+    if(checkAnswerBtn) checkAnswerBtn.addEventListener('click', () => {
+      state.showCorrect = true;
+      render();
+    });
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn) nextBtn.addEventListener('click', () => goNextQuestion());
+  }
+
+  if(q.type === 2){
+    appEl.querySelectorAll('[data-role="ox"]').forEach(el => {
+      el.addEventListener('click', () => {
+        if(state.answered) return;
+        state.userAnswer = el.dataset.val === "true";
+        state.answered = true;
+        if(state.userAnswer === q.data.isTrue) state.stageScore += STAGE_POINTS[1];
+        render();
+      });
+    });
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn) nextBtn.addEventListener('click', () => goNextQuestion());
+  }
+
+  if(q.type === 3){
+    appEl.querySelectorAll('[data-role="opt"]').forEach(el => {
+      el.addEventListener('click', () => {
+        if(state.answered) return;
+        state.userAnswer = el.dataset.val;
+        state.answered = true;
+        if(state.userAnswer === q.data.word) state.stageScore += STAGE_POINTS[2];
+        render();
+      });
+    });
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn) nextBtn.addEventListener('click', () => goNextQuestion());
+  }
+
+  if(q.type === 4){
+    const submitBtn = document.getElementById('submitBtn');
+    const input = document.getElementById('answerInput');
+    if(input){
+      input.focus();
+      input.addEventListener('keydown', (e) => { if(e.key === 'Enter' && submitBtn) submitBtn.click(); });
+    }
+    if(submitBtn) submitBtn.addEventListener('click', () => {
+      state.userAnswer = input.value || "";
+      state.answered = true;
+      if(normalizeAnswer(state.userAnswer) === normalizeAnswer(cleanWord(q.data.word))) state.stageScore += STAGE_POINTS[3];
+      render();
+    });
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn) nextBtn.addEventListener('click', () => goNextQuestion());
+  }
+}
+
+function goNextQuestion(){
+  state.answered = false;
+  state.matchPairs = {};
+  state.selectedImg = null;
+  state.showCorrect = false;
+  state.userAnswer = undefined;
+  if(state.qIndex + 1 < state.stageQuestions.length){
+    state.qIndex += 1;
+  } else {
+    state.screen = "stageresult";
+  }
+  render();
+}
+
+function startStage(stageNum){
+  state.stage = stageNum;
+  state.qIndex = 0;
+  state.stageScore = 0;
+  state.answered = false;
+  state.matchPairs = {};
+  state.selectedImg = null;
+  state.showCorrect = false;
+  state.userAnswer = undefined;
+  state.stageQuestions = buildStageQuestions(stageNum);
+  state.screen = "quiz";
+  render();
+}
+
+render();
+
+</script>
+</body>
+</html>
